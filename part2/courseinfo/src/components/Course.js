@@ -1,11 +1,15 @@
 import React from "react";
 
-const Course = ({ course }) => (
-    <>
-      <Header course={course.name} />
-      <Content parts={course.parts} />
-      <Total parts={course.parts} />
-    </>
+const Course = ({ courses }) => (
+    <div> 
+      {courses.map(course => 
+        <div key={course.id}>
+          <Header course={course.name} />
+          <Content parts={course.parts} />
+          <Total parts={course.parts} />
+        </div>
+        )}
+    </div>
   );
   
   const Header = ({course}) => {
@@ -22,20 +26,20 @@ const Course = ({ course }) => (
     )
   }
 
-  const Content = ({parts}) => {
-    return(
-      <div>
-        <Part part={parts[0].name} exercises={parts[0].exercises} />
-        <Part part={parts[1].name} exercises={parts[1].exercises} />
-        <Part part={parts[2].name} exercises={parts[2].exercises} />
-      </div>
-    )
-  }
+  const Content = ({parts}) =>
+  <div>
+    {parts.map((part, i) =>
+      <Part key={i} part={part.name} exercises={part.exercises} />
+    )}
+  </div>
+
 
   const Total = ({parts}) => {
-    return(
-      <p>Number of exercises {parts[0].exercises + parts[1].exercises + parts[2].exercises}</p>
+    const total = parts.reduce((sum, part) => sum + part.exercises, 0)
+    return (
+      <p> Number of exercises {total}</p>
     )
-  }
 
+  }
+  
 export default Course;
