@@ -1,21 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import Filter from './components/Filter'
 import Content from './components/Content'
 import PersonForm from './components/PersonForm'
 
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { 
-      name: 'Arto Hellas', number: '644312455' 
-    },
-    { 
-      name: 'Pere Garcia', number: '561232145'
-    }
-  ]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+
+  useEffect(() => {
+    console.log('effect')
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        console.log('promise fulfilled')
+        setPersons(response.data)
+      })
+  }, [])
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -33,6 +37,14 @@ const App = () => {
           setPersons(persons.concat(personObject))
           setNewName('')
           setNewNumber('')
+
+          axios
+            .post('http://localhost:3001/persons', personObject)
+            .then(response => {
+              setPersons(persons.concat(response.data))
+              setPersons('')
+              alert('number added')
+            })
     }
   }
 
