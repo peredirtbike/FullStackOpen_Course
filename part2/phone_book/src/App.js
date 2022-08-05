@@ -3,6 +3,7 @@ import axios from 'axios'
 import Filter from './components/Filter'
 import Content from './components/Content'
 import PersonForm from './components/PersonForm'
+import personService from './services/persons'
 
 
 const App = () => {
@@ -12,13 +13,11 @@ const App = () => {
   const [newFilter, setNewFilter] = useState('')
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
-      })
+      personService
+        .getAll()
+        .then(initialPersons => {
+          setPersons(initialPersons)
+        })
   }, [])
 
   const addPerson = (event) => {
@@ -38,12 +37,11 @@ const App = () => {
           setNewName('')
           setNewNumber('')
 
-          axios
-            .post('http://localhost:3001/persons', personObject)
-            .then(response => {
-              setPersons(persons.concat(response.data))
-              setPersons('')
-              alert('number added')
+          personService
+            .create(personObject)
+            .then(returnedPerson => {
+              setPersons(persons.concat(returnedPerson))
+              setNewNumber('')
             })
     }
   }
@@ -63,6 +61,19 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
+  const handleDelete = (id) => {
+    const person = persons.find((person) => person.id === id);
+    const confirmDelete = window.confirm(`Delete ${person.name}?`);
+    if (confirmDelete){
+      personService.deletePerson(id).then(()=>{
+        const filteredPersons = persons.filter((person) => person.id !== id);
+        setPersons(filteredPersons);
+
+        // reset filter
+      });
+    }
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -71,7 +82,8 @@ const App = () => {
           <PersonForm onSubmit={addPerson} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange} />
       <h2>Numbers</h2>
           <ul>
-          <Content persons={persons} />
+          <Content persons={persons}
+          handleDelete={handleDelete} />
           </ul>
     </div>
   )
