@@ -1,6 +1,25 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
+
+app.use(morgan('tiny'))
+
 app.use(express.json())
+
+morgan.token("post", function (req, res) {
+    if (req.body.name) {
+      return JSON.stringify(req.body);
+    } else {
+      return null;
+    }
+  });
+
+app.use(
+    morgan(
+      ":method :url status-:status (:res[content-length]-:response-time ms) :post :user-agent"
+    )
+  );
 
 let persons =[
     { 
@@ -33,49 +52,49 @@ let persons =[
     }
 
 
-    app.post('/api/persons', (request, response) => {
-        let person = request.body
+    app.post('/api/persons', (req, res) => {
+        let person = req.body
         person.id = generateId()
 
         if (!person.name || !person.number){
-            return response.status(400).json({
+            return res.status(400).json({
                 error: 'content missing'
             })
         }
 
         persons = persons.concat(person)
-        response.json(person)
+        res.json(person)
     })
 
-    app.get('/', (request, response) => {
-        response.send('<h1>Hello World!</h1>')
+    app.get('/', (req, res) => {
+        res.send('<h1>Hello World!</h1>')
     })
     
-    app.get('/api/persons', (request, response) => {
-        response.json(persons)
+    app.get('/api/persons', (req, res) => {
+        res.json(persons)
     })
 
-    app.get('/api/persons/:id', (request, response) => {
-        const id = Number(request.params.id)
+    app.get('/api/persons/:id', (req, res) => {
+        const id = Number(req.params.id)
         const person = persons.find(person => person.id === id)
 
         if (person){
-        response.json(person)
+        res.json(person)
         }else{
-        response.status(404).end()
+        res.status(404).end()
         }
     
     })
 
-    app.delete('/api/persons/:id', (request, response) => {
-        const id = Number(request.params.id)
+    app.delete('/api/persons/:id', (req, res) => {
+        const id = Number(req.params.id)
         persons = persons.filter(person => person.id !== id)
     
-        response.status(204).end()
+        res.status(204).end()
     })
 
-    app.get('/info', (request, response) => {
-        response.send('Phonebook has info for' + " " + persons.length + " " + 'persons' + "<p>"+ Date() + "</p>" )
+    app.get('/info', (req, res) => {
+        res.send('Phonebook has info for' + " " + persons.length + " " + 'persons' + "<p>"+ Date() + "</p>" )
     })
 
 
